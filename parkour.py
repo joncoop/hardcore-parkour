@@ -1,6 +1,6 @@
 # Imports
 import pygame
-
+import json
 
 # Initialize game engine
 pygame.init()
@@ -45,11 +45,13 @@ hero_img = pygame.image.load('assets/images/andy.png').convert_alpha()
 ''' tiles '''
 concrete_img = pygame.image.load('assets/images/platformPack_tile016.png').convert_alpha()
 platform_img = pygame.image.load('assets/images/platformPack_tile041.png').convert_alpha()
-                  
-''' obstacles '''
 car_img = pygame.image.load('assets/images/car.png').convert_alpha()
 dumpster_img = pygame.image.load('assets/images/dumpster.png').convert_alpha()
+truck_img = pygame.image.load('assets/images/truck.png').convert_alpha()
 fridge_img = pygame.image.load('assets/images/refrigerator-box.png').convert_alpha()
+
+''' items '''
+dundy_img = pygame.image.load('assets/images/dundy.png').convert_alpha()
 
 
 # Game physics
@@ -137,19 +139,108 @@ class Hero(pygame.sprite.Sprite):
                 self.rect.top = hit.rect.bottom
 
             self.vy = 0
+
+    def process_items(self):
+        hit_list = pygame.sprite.spritecollide(self, items, True)
         
     def check_edges(self):
         if self.rect.left < 0:
             self.rect.left = 0
-        elif self.rect.right > WIDTH:
-            self.rect.right = WIDTH
+        elif self.rect.right > world_width:
+            self.rect.right = world_width
     
     def update(self):
         self.apply_gravity()
         self.move_and_check_tiles()
+        self.process_items()
         self.check_edges()
 
 
+class Dundy(pygame.sprite.Sprite):
+    def __init__(self, x, y, image):
+        super().__init__()
+
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.x = x * SCALE
+        self.rect.y = y * SCALE
+
+    def apply(self, player):
+        pass
+        
+    def update(self):
+        pass
+
+
+class Level():
+    def __init__(self, file):
+        with open(file, 'r') as f:
+            data = f.read()
+
+        self.map_data = json.loads(data)
+
+    def get_size(self):
+        w = self.map_data['width'] * SCALE
+        h = self.map_data['height'] * SCALE
+
+        return w, h
+        
+    def get_start(self):
+        x = self.map_data['start_x']
+        y = self.map_data['start_y']
+
+        return x, y
+    
+    def get_tiles(self):
+        sprites = pygame.sprite.Group()
+        
+        for item in self.map_data['tiles']:
+            x, y, kind = item[0], item[1], item[2]
+
+            if kind == "Concrete":
+                s = Tile(x, y, concrete_img)
+            elif kind == "Platform":
+                s = Tile(x, y, platform_img)
+            elif kind == "Car":
+                s = Tile(x, y, car_img)
+            elif kind == "Dumpster":
+                s = Tile(x, y, dumpster_img)
+            elif kind == "Truck":
+                s = Tile(x, y, truck_img)
+                
+            sprites.add(s)
+
+        return sprites
+
+    def get_items(self):
+        sprites = pygame.sprite.Group()
+
+        for item in self.map_data['items']:
+            x, y, kind = item[0], item[1], item[2]
+            
+            if kind == "Dundy":
+                s = Dundy(x, y, dundy_img)
+            elif kind == "Other":
+                pass
+                
+            sprites.add(s)
+
+        return sprites
+    
+    def get_goal(self):
+        sprites = pygame.sprite.Group()
+
+        for item in self.map_data['goal']:
+            x, y, kind = item[0], item[1], item[2]
+
+            if kind == "Fridge":
+                s = Tile(x, y, fridge_img)
+
+            sprites.add(s)
+            
+        return sprites
+
+   
 # Game helper functions
 def show_title_screen():
     text = FONT_LG.render(TITLE, 1, BLACK)
@@ -158,7 +249,7 @@ def show_title_screen():
     rect.bottom = 128
     screen.blit(text, rect)
     
-    text = FONT_MD.render("Jump on the refridgerator box", 1, BLACK)
+    text = FONT_MD.render("Press space to start.", 1, BLACK)
     rect = text.get_rect()
     rect.centerx = WIDTH // 2
     rect.bottom = 156
@@ -171,58 +262,46 @@ def show_end_screen():
     rect.bottom = 144
     screen.blit(text, rect)
 
+def calculate_offset():
+    x = -1 * hero.rect.centerx + WIDTH / 2
+
+    if hero.rect.centerx < WIDTH / 2:
+        x = 0
+    elif hero.rect.centerx > world_width - WIDTH / 2:
+        x = -1 * world_width + WIDTH
+
+    return x, 0
+
 def setup():
-    global hero, player, tiles, goal, stage
-    
-    ''' Make sprites '''
-    hero = Hero(1, 6, hero_img)
+    global hero, player, tiles, items, goal
+    global world, world_x, world_y, world_width, world_height
+    global stage
 
-    t1 = Tile(0, 8, concrete_img)
-    t2 = Tile(1, 8, concrete_img)
-    t3 = Tile(2, 8, concrete_img)
-    t4 = Tile(3, 8, concrete_img)
-    t5 = Tile(4, 8, concrete_img)
-    t6 = Tile(5, 8, concrete_img)
-    t7 = Tile(6, 8, concrete_img)
-    t8 = Tile(7, 8, concrete_img)
-    t9 = Tile(8, 8, concrete_img)
-    t10 = Tile(9, 8, concrete_img)
-    t11 = Tile(10, 8, concrete_img)
-    t12 = Tile(11, 8, concrete_img)
-    t13 = Tile(12, 8, concrete_img)
-    t14 = Tile(13, 8, concrete_img)
-    t15 = Tile(14, 8, concrete_img)
-    t16 = Tile(15, 8, concrete_img)
+    level = Level("assets/levels/level_1.json")
 
-    t17 = Tile(12, 3, platform_img)
-    t18 = Tile(12, 4, platform_img)
-    t19 = Tile(12, 5, platform_img)
-    t20 = Tile(12, 6, platform_img)
-    t21 = Tile(12, 7, platform_img)
-    
-    o1 = Tile(3, 6, car_img)
-    o2 = Tile(7, 5, dumpster_img)
-    
-    g = Tile(13.5, 5, fridge_img)
-    
-    ''' Make sprite groups '''
+    world_width, world_height = level.get_size()
+    world = pygame.Surface([world_width, world_height])
+    world_x = 0
+    world_y = 0
+
+    x, y = level.get_start()
+    hero = Hero(x, y, hero_img)
     player = pygame.sprite.GroupSingle()
-    tiles = pygame.sprite.Group()
-    goal = pygame.sprite.Group()
-
-    ''' Add sprites to groups '''
     player.add(hero)
+    
+    tiles = level.get_tiles()
+    items = level.get_items()
+    goal = level.get_goal()
+    
+    print(str(len(tiles)) + " tiles loaded")
+    print(str(len(items)) + " items loaded")
+    print(str(len(goal)) + " goals loaded")
 
-    tiles.add(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16)
-    tiles.add(t17, t18, t19, t20, t21)
-    tiles.add(o1, o2)
-
-    goal.add(g)
-        
-    ''' set stage '''
     stage = START
 
-    
+def advance(level_file):
+    pass
+
 # Game loop
 setup()
 
@@ -271,13 +350,17 @@ while running:
             if hero.rect.bottom > 475:
                 stage = END
 
-            
-    # Drawing code
-    screen.fill(GRAY)
-    player.draw(screen)
-    tiles.draw(screen)
-    goal.draw(screen)
+    world_x, world_y = calculate_offset()
         
+    # Drawing code
+    world.fill(GRAY)
+    player.draw(world)
+    tiles.draw(world)
+    items.draw(world)
+    goal.draw(world)
+
+    screen.blit(world, [world_x, world_y])
+    
     if stage == START:
         show_title_screen()        
     elif stage == END:
