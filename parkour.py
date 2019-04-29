@@ -14,6 +14,11 @@ SIZE = (WIDTH, HEIGHT)
 TITLE = "Hardcore Parkour"
 FPS = 60
 
+# Actually make the window
+screen = pygame.display.set_mode(SIZE)
+pygame.display.set_caption(TITLE)
+clock = pygame.time.Clock()
+
 # Colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -252,9 +257,6 @@ class Level():
 # Main game class
 class Game():
     def __init__(self):
-        self.screen = pygame.display.set_mode(SIZE)
-        self.pygame.display.set_caption(TITLE)
-        self.clock = pygame.time.Clock()
         self.running = True
     
     def setup(self):
@@ -370,7 +372,7 @@ class Game():
         self.goal.draw(self.world)
 
         offset_x, offset_y = self.calculate_offset()
-        self.screen.blit(self.world, [offset_x, offset_y])
+        screen.blit(self.world, [offset_x, offset_y])
         
         if self.stage == START:
             self.show_title_screen()        
@@ -390,7 +392,7 @@ class Game():
             self.process_input()
             self.update()
             self.render()
-            self.clock.tick(FPS)
+            clock.tick(FPS)
 
             
 # Let's do this!
