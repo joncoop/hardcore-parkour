@@ -1,73 +1,118 @@
 {
-	"width": 36,
-	"height": 9,
+	"size": {
+		"scale": 64,
+		"width": 36,
+		"height": 9
+	},
 
-	"start_x": 1,
-	"start_y": 6,
+	"physics": {
+		"gravity": 1.0,
+		"terminal_velocity": 24
+	},
 
-	"tiles": [
-		[0, 8, "Concrete"],
-		[1, 8, "Concrete"],
-		[2, 8, "Concrete"],
-		[3, 8, "Concrete"],
-		[4, 8, "Concrete"],
-		[5, 8, "Concrete"],
-		[6, 8, "Concrete"],
-		[7, 8, "Concrete"],
-		[8, 8, "Concrete"],
-		[9, 8, "Concrete"],
-		[10, 8, "Concrete"],
-		[11, 8, "Concrete"],
-		[12, 8, "Concrete"],
-		[13, 8, "Concrete"],
-		[14, 8, "Concrete"],
-		[15, 8, "Concrete"],
-		[16, 8, "Concrete"],
-		[17, 8, "Concrete"],
-		[18, 8, "Concrete"],
-		[19, 8, "Concrete"],
-		[20, 8, "Concrete"],
-		[21, 8, "Concrete"],
-		[22, 8, "Concrete"],
-		[23, 8, "Concrete"],
-		[24, 8, "Concrete"],
-		[25, 8, "Concrete"],
-		[26, 8, "Concrete"],
-		[27, 8, "Concrete"],
-		[28, 8, "Concrete"],
-		[29, 8, "Concrete"],
-		[30, 8, "Concrete"],
-		[31, 8, "Concrete"],
-		[32, 8, "Concrete"],
-		[33, 8, "Concrete"],
-		[34, 8, "Concrete"],
-		[35, 8, "Concrete"],
+	"music": "music_file.ogg",
 
-		[12, 4, "Platform"],
-		[12, 5, "Platform"],
-		[12, 6, "Platform"],
-		[12, 7, "Platform"],
+	"background": {
+		"tiled_image": "image_file1.png",
+		"tiles": [
+			[10, 10, "TileName"],
+			[20, 10, "TileName"],
+			[30, 10, "TileName"]
+		],
+		"parallax_speed": 0.5
+	},
 
-		[17, 6, "Platform"],
-		[18, 6, "Platform"],
-		[19, 6, "Platform"],
+	"midground": {
+		"tiled_image": "image_file1.png",
+		"tiles": [
+			[0, 0, "TileName"],
+			[0, 0, "TileName"],
+			[0, 0, "TileName"]
+		],
+		"parallax_speed": 0.5
+	},
 
-		[21, 4, "Platform"],
-		[22, 4, "Platform"],
-		[23, 4, "Platform"],
+	"foreground": {
+		"tiles": [
+			[0, 0, "TileName"],
+			[0, 0, "TileName"],
+			[0, 0, "TileName"]
+		],
+		"parallax_speed": 0.5
+	},
 
-		[3, 6, "Car"],
-		[7, 5, "Dumpster"],
-		[22, 4, "Truck"]
-	],
+	"main": {
+		"start_x": 1,
+		"start_y": 6,
 
-	"items": [
-		[8, 4, "Dundy"],
-		[18, 5, "Dundy"],
-		[22, 3, "Dundy"]
-	],
+		"tiles": [
+			[0, 8, "Concrete"],
+			[1, 8, "Concrete"],
+			[2, 8, "Concrete"],
+			[3, 8, "Concrete"],
+			[4, 8, "Concrete"],
+			[5, 8, "Concrete"],
+			[6, 8, "Concrete"],
+			[7, 8, "Concrete"],
+			[8, 8, "Concrete"],
+			[9, 8, "Concrete"],
+			[10, 8, "Concrete"],
+			[11, 8, "Concrete"],
+			[12, 8, "Concrete"],
+			[13, 8, "Concrete"],
+			[14, 8, "Concrete"],
+			[15, 8, "Concrete"],
+			[16, 8, "Concrete"],
+			[17, 8, "Concrete"],
+			[18, 8, "Concrete"],
+			[19, 8, "Concrete"],
+			[20, 8, "Concrete"],
+			[21, 8, "Concrete"],
+			[22, 8, "Concrete"],
+			[23, 8, "Concrete"],
+			[24, 8, "Concrete"],
+			[25, 8, "Concrete"],
+			[26, 8, "Concrete"],
+			[27, 8, "Concrete"],
+			[28, 8, "Concrete"],
+			[29, 8, "Concrete"],
+			[30, 8, "Concrete"],
+			[31, 8, "Concrete"],
+			[32, 8, "Concrete"],
+			[33, 8, "Concrete"],
+			[34, 8, "Concrete"],
+			[35, 8, "Concrete"],
 
-	"goal": [
-		[33, 5, "Fridge"]
-	]
+			[12, 4, "Platform"],
+			[12, 5, "Platform"],
+			[12, 6, "Platform"],
+			[12, 7, "Platform"],
+
+			[17, 6, "Platform"],
+			[18, 6, "Platform"],
+
+			[22, 4, "Platform"],
+			[23, 4, "Platform"],
+
+			[3, 6, "Car"],
+			[7, 5, "Dumpster"],
+			[22, 4, "Truck"]
+		],
+
+		"items": [
+			[8, 4, "Dundy"],
+			[18, 5, "Dundy"],
+			[22, 3, "Dundy"]
+		],
+
+		"enemies": [
+			[0, 0, "EnemyType"],
+			[0, 0, "EnemyType"],
+			[0, 0, "EnemyType"]
+		],
+
+		"goal": [
+			[33, 5, "Fridge"]
+		]
+	}
 }
