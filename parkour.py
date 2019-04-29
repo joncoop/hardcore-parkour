@@ -78,19 +78,21 @@ class Tile(pygame.sprite.Sprite):
         
     
 class Hero(pygame.sprite.Sprite):
-    def __init__(self, x, y, image):
+    def __init__(self, image):
         super().__init__()
 
         self.image = image
         self.rect = self.image.get_rect()
-        self.rect.x = x * SCALE
-        self.rect.y = y * SCALE
 
         self.speed = 5
         self.jump_power = 24
         self.vx = 0
         self.vy = 0
 
+    def move_to(self, x, y):
+        self.rect.x = x * SCALE
+        self.rect.y = y * SCALE
+        
     def move_left(self):
         self.vx = -self.speed
     
@@ -273,11 +275,22 @@ def calculate_offset():
     return x, 0
 
 def setup():
-    global hero, player, tiles, items, goal
-    global world, world_x, world_y, world_width, world_height
-    global stage
+    global hero, player, stage
 
-    level = Level("assets/levels/level_1.json")
+    start_level = "assets/levels/level_1.json"
+
+    hero = Hero(hero_img)
+    player = pygame.sprite.GroupSingle()
+    player.add(hero)
+
+    stage = START
+    advance(start_level)
+
+def advance(level_file):
+    global tiles, items, goal
+    global world, world_x, world_y, world_width, world_height
+    
+    level = Level(level_file)
 
     world_width, world_height = level.get_size()
     world = pygame.Surface([world_width, world_height])
@@ -285,23 +298,13 @@ def setup():
     world_y = 0
 
     x, y = level.get_start()
-    hero = Hero(x, y, hero_img)
-    player = pygame.sprite.GroupSingle()
-    player.add(hero)
+    hero.move_to(x, y)
     
     tiles = level.get_tiles()
     items = level.get_items()
     goal = level.get_goal()
+
     
-    print(str(len(tiles)) + " tiles loaded")
-    print(str(len(items)) + " items loaded")
-    print(str(len(goal)) + " goals loaded")
-
-    stage = START
-
-def advance(level_file):
-    pass
-
 # Game loop
 setup()
 
