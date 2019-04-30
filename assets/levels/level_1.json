@@ -13,6 +13,7 @@
 	"music": "music_file.ogg",
 
 	"background": {
+		"color": [],
 		"tiled_image": "image_file1.png",
 		"tiles": [
 			[10, 10, "TileName"],
@@ -28,8 +29,7 @@
 			[0, 0, "TileName"],
 			[0, 0, "TileName"],
 			[0, 0, "TileName"]
-		],
-		"parallax_speed": 0.5
+		]
 	},
 
 	"foreground": {
@@ -111,8 +111,12 @@
 			[0, 0, "EnemyType"]
 		],
 
-		"goal": [
-			[33, 5, "Fridge"]
-		]
+		"goal": {
+			"items": [
+				[33, 5, "Fridge"]
+			],
+			"region": [33, 5, 2, 3],
+			"threshold": 33
+		}
 	}
 }
