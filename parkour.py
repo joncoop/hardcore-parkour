@@ -20,6 +20,7 @@ pygame.display.set_caption(TITLE)
 clock = pygame.time.Clock()
 
 # Colors
+TRANSPARENT = (0, 0, 0, 0)
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GRAY = (200, 200, 200)
@@ -51,21 +52,6 @@ dundy_img = pygame.image.load('assets/images/items/dundy.png').convert_alpha()
 levels = ["assets/levels/level_1.json",
           "assets/levels/level_1.json",
           "assets/levels/level_1.json"]
-
-# Stages
-START = 0
-PLAYING = 1
-CLEARED = 2
-WIN = 3
-LOSE = 4
-
-# Goal type
-ITEM = 0
-REGION = 1
-THRESHOLD = 2
-OTHER = 3
-
-goal_type = 1
 
 
 # Supporting game classes
@@ -161,20 +147,11 @@ class Hero(pygame.sprite.Sprite):
             self.rect.right = world.get_width()
 
     def check_goal(self, goal):
-        if goal_type == ITEM:
-            hit_list = pygame.sprite.spritecollide(self, goal, False)
-            self.reached_goal = len(hit_list) > 0
-        elif goal_type == REGION:
-            self.reached_goal = goal.contains(self.rect)
-        elif goal_type == THRESHOLD:
-            self.reached_goal = self.rect.left > goal
-        elif goal_type == OTHER:
-            ''' put your code here '''
-            pass
+        self.reached_goal = goal.contains(self.rect)
         
     def update(self, game):
         self.apply_gravity(game.level)
-        self.move_and_check_tiles(game.tiles)
+        self.move_and_check_tiles(game.main_tiles)
         self.process_items(game.items)
         self.check_edges(game.world)
         self.check_goal(game.goal)
@@ -201,6 +178,7 @@ class Dundy(pygame.sprite.Sprite):
         then here is where you can implement that.
         '''
         pass
+
 
 class EnemyTypeOne(pygame.sprite.Sprite):
     def __init__(self, x, y, image):
@@ -235,52 +213,70 @@ class Level():
 
         self.map_data = json.loads(data)
 
-        self.load_dimensions()
+        self.load_layout()
         self.load_physics()
-        self.load_start()
-        self.load_main_tiles()
+        self.load_tiles()
         self.load_items()
         self.load_enemies()
         self.load_goal()
 
-    def load_dimensions(self):
-        self.scale =  self.map_data['size']['scale']
-        self.width =  self.map_data['size']['width'] * self.scale
-        self.height = self.map_data['size']['height'] * self.scale
-
+    def load_layout(self):
+        self.scale =  self.map_data['layout']['scale']
+        self.width =  self.map_data['layout']['size'][0] * self.scale
+        self.height = self.map_data['layout']['size'][1] * self.scale
+        self.start_x = self.map_data['layout']['start'][0] * self.scale
+        self.start_y = self.map_data['layout']['start'][1] * self.scale
+        
     def load_physics(self):
         self.gravity = self.map_data['physics']['gravity']
         self.terminal_velocity = self.map_data['physics']['terminal_velocity']
-        
-    def load_start(self):
-        self.start_x = self.map_data['main']['start_x'] * self.scale
-        self.start_y = self.map_data['main']['start_y'] * self.scale
 
-    def load_main_tiles(self):
-        self.tiles = pygame.sprite.Group()
-        for element in self.map_data['main']['tiles']:
+    def load_background(self):
+        self.bg_color = self.map_data['background']['color']
+        self.image = self.map_data['background']['image']
+               
+    def load_tiles(self):
+        tile_images = { "Concrete": concrete_img,
+                        "Platform": platform_img,
+                        "Car": car_img,
+                        "Dumpster": dumpster_img,
+                        "Truck": truck_img,
+                        "Fridge": fridge_img }
+        
+        self.midground_tiles = pygame.sprite.Group()
+        self.main_tiles = pygame.sprite.Group()
+        self.foreground_tiles = pygame.sprite.Group()
+        
+        for element in self.map_data['tiles']['midground']:
             x = element[0] * self.scale
             y = element[1] * self.scale
             kind = element[2]
 
-            if kind == "Concrete":
-                s = Tile(x, y, concrete_img)
-            elif kind == "Platform":
-                s = Tile(x, y, platform_img)
-            elif kind == "Car":
-                s = Tile(x, y, car_img)
-            elif kind == "Dumpster":
-                s = Tile(x, y, dumpster_img)
-            elif kind == "Truck":
-                s = Tile(x, y, truck_img)
-            elif kind == "Fridge":
-                s = Tile(x, y, fridge_img)
-                
-            self.tiles.add(s)
+            img = tile_images[kind]
+            t = Tile(x, y, img)
+            self.foreground_tiles.add(t)
+
+        for element in self.map_data['tiles']['main']:
+            x = element[0] * self.scale
+            y = element[1] * self.scale
+            kind = element[2]
+
+            img = tile_images[kind]
+            t = Tile(x, y, img)
+            self.main_tiles.add(t)
+
+        for element in self.map_data['tiles']['foreground']:
+            x = element[0] * self.scale
+            y = element[1] * self.scale
+            kind = element[2]
+
+            img = tile_images[kind]
+            t = Tile(x, y, img)
+            self.foreground_tiles.add(t)
 
     def load_items(self):
         self.items = pygame.sprite.Group()
-        for element in self.map_data['main']['items']:
+        for element in self.map_data['items']:
             x = element[0] * self.scale
             y = element[1] * self.scale
             kind = element[2]
@@ -296,35 +292,20 @@ class Level():
         pass
 
     def load_goal(self):
-        if goal_type == ITEM:
-            self.goal = pygame.sprite.Group()
-            
-            for element in self.map_data['main']['goal']['items']:
-                x = element[0] * self.scale
-                y = element[1] * self.scale
-                kind = element[2]
-                
-                if kind == "FlagTop":
-                    s = Tile(x, y, flag_top_img)
-                elif kind == "FlagPole":
-                    s = Tile(x, y, flag_pole_img)
-                elif kind == "Fridge":
-                    s = Tile(x, y, fridge_img)
+        g = self.map_data['layout']['goal']
 
-                self.goal.add(s)
-                
-        elif goal_type == REGION:
-            element = self.map_data['main']['goal']['region']
-            x = element[0] * self.scale
-            y = element[1] * self.scale
-            w = element[2] * self.scale
-            h = element[3] * self.scale
-            self.goal = pygame.Rect(x, y, w, h)
-        
-        elif goal_type == THRESHOLD:
-            self.goal = self.map_data['main']['goal']['threshold'] * self.scale
+        if isinstance(g, int):
+            x = g * self.scale
+            y = 0
+            w = self.width - x
+            h = self.height
+        elif isinstance(g, list):
+            x = g[0] * self.scale
+            y = g[1] * self.scale
+            w = g[2] * self.scale
+            h = g[3] * self.scale
 
-        print(self.goal)
+        self.goal = pygame.Rect([x, y, w, h])
 
     def get_size(self):
         return self.width, self.height
@@ -332,8 +313,14 @@ class Level():
     def get_start(self):
         return self.start_x, self.start_y
 
-    def get_tiles(self):
-        return self.tiles
+    def get_midground_tiles(self):
+        return self.midground_tiles
+
+    def get_main_tiles(self):
+        return self.main_tiles
+
+    def get_foreground_tiles(self):
+        return self.foreground_tiles
 
     def get_items(self):
         return self.items
@@ -347,6 +334,13 @@ class Level():
 
 # Main game class
 class Game():
+
+    START = 0
+    PLAYING = 1
+    CLEARED = 2
+    WIN = 3
+    LOSE = 4
+
     def __init__(self, levels):
         self.running = True
         self.levels = levels
@@ -356,32 +350,48 @@ class Game():
         self.player = pygame.sprite.GroupSingle()
         self.player.add(self.hero)
 
-        self.stage = START
+        self.stage = Game.START
         self.current_level = 1
+        self.load_level()
 
     def load_level(self):
-        level_index = self.current_level - 1 # -1 because list indices are one less than level number
+        level_index = self.current_level - 1
         level_data = self.levels[level_index] 
         self.level = Level(level_data) 
-
-        world_width, world_height = self.level.get_size()
-        self.world = pygame.Surface([world_width, world_height])
-
+        
         x, y = self.level.get_start()
         self.hero.move_to(x, y)
         self.hero.reached_goal = False
         
-        self.tiles = self.level.get_tiles()
+        self.midground_tiles = self.level.get_midground_tiles()
+        self.main_tiles = self.level.get_main_tiles()
+        self.foreground_tiles = self.level.get_foreground_tiles()
         self.items = self.level.get_items()
         self.goal = self.level.get_goal()
+        print(self.goal)
 
+        world_width, world_height = self.level.get_size()
+
+        ''' create surface layers '''
+        self.world = pygame.Surface([world_width, world_height])
+        self.background = pygame.Surface([world_width, world_height])
+        self.inactive = pygame.Surface([world_width, world_height], pygame.SRCALPHA, 32)
+        self.active = pygame.Surface([world_width, world_height], pygame.SRCALPHA, 32)
+        self.foreground = pygame.Surface([world_width, world_height], pygame.SRCALPHA, 32)
+
+        ''' pre-render inactive layers '''
+        self.background.fill(GRAY)
+        self.midground_tiles.draw(self.inactive)
+        self.main_tiles.draw(self.inactive)        
+        self.foreground_tiles.draw(self.foreground)
+                
     def advance(self):
         if self.current_level < len(self.levels):
             self.current_level += 1
             self.load_level()
-            self.stage = PLAYING
+            self.stage = Game.PLAYING
         else:
-            self.stage = WIN
+            self.stage = Game.WIN
 
     def show_title_screen(self):
         text = FONT_LG.render(TITLE, 1, BLACK)
@@ -436,21 +446,21 @@ class Game():
                 self.running = False
                 
             elif event.type == pygame.KEYDOWN:
-                if self.stage == START:
+                if self.stage == Game.START:
                     if event.key == pygame.K_SPACE:
-                        self.stage = PLAYING
+                        self.stage = Game.PLAYING
                         
-                elif self.stage == PLAYING:
+                elif self.stage == Game.PLAYING:
                     if event.key == pygame.K_SPACE:
-                        self.hero.jump(self.tiles)
+                        self.hero.jump(self.main_tiles)
 
-                elif self.stage == WIN or self.stage == LOSE:
+                elif self.stage == Game.WIN or self.stage == Game.LOSE:
                     if event.key == pygame.K_SPACE:
                         self.setup()
 
         pressed = pygame.key.get_pressed()
         
-        if self.stage == PLAYING:
+        if self.stage == Game.PLAYING:
             if pressed[pygame.K_LEFT]:
                 self.hero.move_left()
             elif pressed[pygame.K_RIGHT]:
@@ -459,53 +469,45 @@ class Game():
                 self.hero.stop()
      
     def update(self):
-        if self.stage == PLAYING:
+        if self.stage == Game.PLAYING:
             self.player.update(self)
             #self.enemies.update(self)
 
             if self.hero.reached_goal:
-                self.stage = CLEARED
+                self.stage = Game.CLEARED
                 self.cleared_timer = FPS * 2
                 
-        elif self.stage == CLEARED:
+        elif self.stage == Game.CLEARED:
             self.cleared_timer -= 1
 
             if self.cleared_timer == 0:
                 self.advance()
             
     def render(self):
-        self.world.fill(GRAY)
-        self.player.draw(self.world)
-        self.tiles.draw(self.world)
-        self.items.draw(self.world)
+        self.active.fill(TRANSPARENT)
+        self.player.draw(self.active)
+        self.items.draw(self.active)
 
-        if goal_type == ITEM:
-            self.goal.draw(self.world)
-        elif goal_type == REGION:
-            #pygame.draw.rect(self.world, BLACK, self.goal)
-            self.world.blit(fridge_img, self.goal)
-        elif goal_type == THRESHOLD:
-            pass
-        elif goal_type == OTHER:
-            pass
-
+        self.world.blit(self.background, [0, 0])
+        self.world.blit(self.inactive, [0, 0])
+        self.world.blit(self.active, [0, 0])
+        self.world.blit(self.foreground, [0, 0])
+        
         offset_x, offset_y = self.calculate_offset()
         screen.blit(self.world, [offset_x, offset_y])
 
-        if self.stage == START:
+        if self.stage == Game.START:
             self.show_title_screen()        
-        elif self.stage == CLEARED:
+        elif self.stage == Game.CLEARED:
             self.show_cleared_screen()
-        elif self.stage == WIN:
+        elif self.stage == Game.WIN:
             self.show_win_screen()
-        elif self.stage == LOSE:
+        elif self.stage == Game.LOSE:
             self.show_lose_screen()
 
         pygame.display.flip()
             
-    def run(self):
-        self.load_level()
-        
+    def run(self):        
         while self.running:
             self.process_input()
             self.update()

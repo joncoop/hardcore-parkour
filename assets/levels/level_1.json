@@ -1,8 +1,9 @@
 {
-	"size": {
+	"layout": {
 		"scale": 64,
-		"width": 36,
-		"height": 9
+		"size": [36, 9],
+		"start": [1, 6],
+		"goal": [33, 5, 2, 3]
 	},
 
 	"physics": {
@@ -13,39 +14,17 @@
 	"music": "music_file.ogg",
 
 	"background": {
-		"color": [],
-		"tiled_image": "image_file1.png",
-		"tiles": [
-			[10, 10, "TileName"],
-			[20, 10, "TileName"],
-			[30, 10, "TileName"]
-		],
+		"color": [200, 200, 200],
+		"image": "image_file1.png",
 		"parallax_speed": 0.5
 	},
 
-	"midground": {
-		"tiled_image": "image_file1.png",
-		"tiles": [
-			[0, 0, "TileName"],
-			[0, 0, "TileName"],
-			[0, 0, "TileName"]
-		]
-	},
+	"tiles": {
+		"midground": [
 
-	"foreground": {
-		"tiles": [
-			[0, 0, "TileName"],
-			[0, 0, "TileName"],
-			[0, 0, "TileName"]
 		],
-		"parallax_speed": 0.5
-	},
 
-	"main": {
-		"start_x": 1,
-		"start_y": 6,
-
-		"tiles": [
+		"main": [
 			[0, 8, "Concrete"],
 			[1, 8, "Concrete"],
 			[2, 8, "Concrete"],
@@ -99,24 +78,20 @@
 			[22, 4, "Truck"]
 		],
 
-		"items": [
-			[8, 4, "Dundy"],
-			[18, 5, "Dundy"],
-			[22, 3, "Dundy"]
-		],
+		"foreground": [
+			[33, 5, "Fridge"]
+		]
+	},
 
-		"enemies": [
-			[0, 0, "EnemyType"],
-			[0, 0, "EnemyType"],
-			[0, 0, "EnemyType"]
-		],
+	"items": [
+		[8, 4, "Dundy"],
+		[18, 5, "Dundy"],
+		[22, 3, "Dundy"]
+	],
 
-		"goal": {
-			"items": [
-				[33, 5, "Fridge"]
-			],
-			"region": [33, 5, 2, 3],
-			"threshold": 33
-		}
-	}
+	"enemies": [
+		[0, 0, "EnemyType"],
+		[0, 0, "EnemyType"],
+		[0, 0, "EnemyType"]
+	]
 }
