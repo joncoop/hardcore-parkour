@@ -69,6 +69,17 @@ goal_type = 1
 
 
 # Supporting game classes
+class Tile(pygame.sprite.Sprite):
+    def __init__(self, x, y, image):
+        super().__init__()
+
+        self.image = image
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
+
 class Hero(pygame.sprite.Sprite):
     def __init__(self, image):
         super().__init__()
@@ -169,17 +180,6 @@ class Hero(pygame.sprite.Sprite):
         self.check_goal(game.goal)
 
 
-class Tile(pygame.sprite.Sprite):
-    def __init__(self, x, y, image):
-        super().__init__()
-
-        self.image = image
-        self.mask = pygame.mask.from_surface(self.image)
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
-
-
 class Dundy(pygame.sprite.Sprite):
     def __init__(self, x, y, image):
         super().__init__()
@@ -211,6 +211,9 @@ class EnemyTypeOne(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
 
+    def update(self):
+        pass
+
 
 class EnemyTypeTwo(pygame.sprite.Sprite):
     def __init__(self, x, y, image):
@@ -220,6 +223,9 @@ class EnemyTypeTwo(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+
+    def update(self):
+        pass
 
         
 class Level():
@@ -476,7 +482,8 @@ class Game():
         if goal_type == ITEM:
             self.goal.draw(self.world)
         elif goal_type == REGION:
-            pygame.draw.rect(self.world, BLACK, self.goal)
+            #pygame.draw.rect(self.world, BLACK, self.goal)
+            self.world.blit(fridge_img, self.goal)
         elif goal_type == THRESHOLD:
             pass
         elif goal_type == OTHER:
