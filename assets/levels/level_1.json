@@ -15,7 +15,7 @@
 
 	"background": {
 		"color": [200, 200, 200],
-		"image": "image_file1.png",
+		"image": "assets/images/backgrounds/gray_texture.jpg",
 		"parallax_speed": 0.5
 	},
 
@@ -102,8 +102,8 @@
 	],
 
 	"enemies": [
-		[0, 0, "Michael"],
-		[0, 0, "Dwight"],
-		[0, 0, "Dwight"]
+		[10, 6, "Michael"],
+		[22, 3, "Dwight"],
+		[37, 2, "Dwight"]
 	]
 }
