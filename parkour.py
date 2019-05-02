@@ -505,7 +505,7 @@ class Game():
         self.player.add(self.hero)
 
         self.stage = Game.START
-        self.current_level = 0
+        self.current_level = 1
         self.score = 0
         self.load_level()
 
@@ -554,6 +554,7 @@ class Game():
         if self.current_level < len(self.levels):
             self.current_level += 1
             self.load_level()
+            self.sound_player.play_music()
             self.stage = Game.PLAYING
         else:
             self.stage = Game.WIN
@@ -654,7 +655,6 @@ class Game():
 
             if self.cleared_timer == 0:
                 self.advance()
-                self.sound_player.play_music()
             
     def render(self):
         self.active.fill(TRANSPARENT)
